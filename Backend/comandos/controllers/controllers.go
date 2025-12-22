@@ -56,10 +56,9 @@ func HandleCommand(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// ✅ Ejecutar y obtener SALIDAS (no solo errores)
 	_, todasSalidas, _ := general.GlobalCom(comandosValidos)
 
-	// ✅ Devolver todas las salidas al frontend
+	//Devolver todas las salidas al frontend
 	if err := json.NewEncoder(w).Encode(general.ResultadoSalida("", false, todasSalidas)); err != nil {
 		json.NewEncoder(w).Encode(general.ResultadoSalida("Error interno al generar respuesta", true, nil))
 	}

@@ -31,21 +31,11 @@ func ObtenerParametros(x string) []string {
 	return comandos
 }
 
-// func getCommand(comm string, commands ...string) string {
-// 	comm = strings.ToLower(comm)
-// 	for _, c := range commands {
-// 		if strings.HasPrefix(comm, c) {
-// 			return c
-// 		}
-// 	}
-// 	return ""
-// }
-
 func CrearCarpeta() {
 	// nombre := "VDIC-MIA"
 	// reportes := "VDIC-MIA/Rep"
 	// discos := "VDIC-MIA/Disks"
-	nombreArchivo := "VDIC-MIA/CarpetaImagenes.txt"
+	nombreArchivo := "VDIC-MIA/Carpeta.txt"
 	// git1 := "Rep/.gitignore"
 	// git2 := "VDIC-MIA/PFINAL/Disks/.gitignore"
 	// if _, err := os.Stat(nombre); os.IsNotExist(err) {

@@ -1,8 +1,9 @@
-package admonDisk
+package admonUsers
 
 import (
 	"Proyecto/Estructuras/size"
 	"Proyecto/Estructuras/structures"
+	"Proyecto/comandos/admonDisk"
 	"Proyecto/comandos/utils"
 	"encoding/binary"
 	"fmt"
@@ -44,7 +45,7 @@ func MkfsExecute(comando string, parametros map[string]string) (string, bool) {
 
 func formatearParticion(id string, tipoFormateo string) (string, bool) {
 	// Buscar la partición montada por ID
-	particionMontada, err := GetMountedPartitionByID(id)
+	particionMontada, err := admonDisk.GetMountedPartitionByID(id)
 	if err != nil {
 		return fmt.Sprintf("Partición con ID '%s' no encontrada o no montada", id), true
 	}
@@ -152,7 +153,7 @@ func formatearEXT2(file *os.File, particion *structures.Partition, id string, no
 	}
 
 	// ==================== PASO 6: CREAR users.txt ====================
-	color.Cyan("→ Creando archivo users.txt...")
+	color.Cyan("Creando archivo users.txt...")
 	if err := crearArchivoUsers(file, &sb); err != nil {
 		return "[MKFS]: Error al crear users.txt", true
 	}

@@ -2,6 +2,8 @@ package comandos
 
 import (
 	"Proyecto/comandos/admonDisk"
+	"Proyecto/comandos/admonUsers"
+
 	/*royecto/comandos/admonUsers"*/
 	"fmt"
 	"strings"
@@ -61,7 +63,7 @@ var commands = map[string]CommandDef{
 		},
 		Required: []string{"id"},
 		Defaults: map[string]string{"type": "FULL"},
-		Run:      admonDisk.MkfsExecute,
+		Run:      admonUsers.MkfsExecute,
 	},
 	"cat": {
 		Allowed: map[string]bool{
@@ -70,11 +72,11 @@ var commands = map[string]CommandDef{
 		},
 		Required: []string{"file1"},
 		Defaults: map[string]string{},
-		Run:      admonDisk.CatExecute,
+		Run:      admonUsers.CatExecute,
 	},
 	// En el mapa commands, agregar después de "cat":
 
-	/*ogin": {
+	"login": {
 		Allowed: map[string]bool{
 			"user": true, "pass": true, "id": true,
 		},
@@ -103,7 +105,7 @@ var commands = map[string]CommandDef{
 		Required: []string{"user", "pass", "grp"},
 		Defaults: map[string]string{},
 		Run:      admonUsers.MkusrExecute,
-	},*/
+	},
 }
 
 func DiskCommandProps(comando string, instrucciones []string) (string, bool) {
