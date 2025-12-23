@@ -24,7 +24,7 @@ function App() {
 
       let jsonData;
       try {
-        jsonData = await response.json(); // ✅ Parsea el JSON
+        jsonData = await response.json(); 
       } catch (parseError) {
         throw new Error(`Error al parsear JSON: ${parseError.message}`);
       }
