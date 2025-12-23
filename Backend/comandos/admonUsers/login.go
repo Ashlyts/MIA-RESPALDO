@@ -72,13 +72,13 @@ func iniciarSesion(usuario string, password string, idParticion string) (string,
 	}
 
 	// Leer el SuperBloque
-	sb, errSB := utils.LeerSuperBloque(file, particion.Part_start) // Usa utils.LeerSuperBloque
+	sb, errSB := utils.LeerSuperBloque(file, particion.Part_start)
 	if errSB != nil {
 		return "[LOGIN]: Partición no formateada o error al leer SuperBloque", true
 	}
 
 	// Leer el archivo users.txt
-	contenidoUsers, errUsers := utils.LeerArchivoDesdeRuta(file, &sb, "/users.txt") // Usa utils.LeerArchivoDesdeRuta
+	contenidoUsers, errUsers := utils.LeerArchivoDesdeRuta(file, &sb, "/users.txt")
 	if errUsers != nil {
 		return "[LOGIN]: Error al leer archivo users.txt: " + errUsers.Error(), true
 	}
@@ -89,7 +89,7 @@ func iniciarSesion(usuario string, password string, idParticion string) (string,
 		return "[LOGIN]: Usuario o contraseña incorrectos", true
 	}
 
-	// Crear la sesión - Usa global.SesionActiva y global.SesionUsuario
+	// Crear la sesión
 	global.SesionActiva = &global.SesionUsuario{
 		UsuarioActual: usuario,
 		UID:           uid,
@@ -99,7 +99,20 @@ func iniciarSesion(usuario string, password string, idParticion string) (string,
 		Particion:     particion,
 	}
 
-	// Mostrar mensaje de éxito
+	// ✅ Generar mensaje formateado (SIN colores, para frontend)
+	salida := fmt.Sprintf(`═══════════════════════════════════════════════════════════
+SESIÓN INICIADA EXITOSAMENTE
+═══════════════════════════════════════════════════════════
+  Usuario:        %s
+  UID:            %d
+  GID:            %d
+  Partición:      %s
+  ID:             %s
+  Disco:          %s
+═══════════════════════════════════════════════════════════`,
+		usuario, uid, gid, particionMontada.PartName, idParticion, particionMontada.DiskName)
+
+	// ✅ Opcional: seguir imprimiendo en backend con colores (solo para logs)
 	color.Green("═══════════════════════════════════════════════════════════")
 	color.Green("SESIÓN INICIADA EXITOSAMENTE")
 	color.Green("═══════════════════════════════════════════════════════════")
@@ -111,7 +124,8 @@ func iniciarSesion(usuario string, password string, idParticion string) (string,
 	color.Cyan("  Disco:          %s", particionMontada.DiskName)
 	color.Green("═══════════════════════════════════════════════════════════")
 
-	return "", false
+	// ✅ Devolver el mensaje limpio (sin ANSI codes)
+	return salida, false
 }
 
 func ValidarCredenciales(contenido string, usuario string, password string) (int32, int32, bool) {

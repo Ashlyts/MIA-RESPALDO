@@ -82,32 +82,38 @@ func crearUsuario(nombreUsuario string, password string, grupo string) (string, 
 	}
 
 	// Verificar que el grupo exista
-	if !ExisteGrupo(contenidoActual, grupo) { // Asume que ExisteGrupo está disponible en utils o filecomands
+	if !ExisteGrupo(contenidoActual, grupo) {
 		return fmt.Sprintf("[MKUSR]: El grupo '%s' no existe", grupo), true
 	}
 
 	// Calcular nuevo UID
 	nuevoUID := ObtenerSiguienteUID(contenidoActual)
 
-	// Agregar nueva línea: UID,U,grupo,usuario,password
+	// Agregar nueva línea
 	nuevaLinea := fmt.Sprintf("%d,U,%s,%s,%s\n", nuevoUID, grupo, nombreUsuario, password)
 	nuevoContenido := contenidoActual + nuevaLinea
 
-	// Escribir el nuevo contenido usando la función de utils
+	// Escribir el nuevo contenido
 	if err := utils.EscribirArchivoUsersText(file, &sb, nuevoContenido); err != nil {
 		return "[MKUSR]: Error al escribir en users.txt: " + err.Error(), true
 	}
 
-	color.Green("═══════════════════════════════════════════════════════════")
-	color.Green("✓ USUARIO CREADO EXITOSAMENTE")
-	color.Green("═══════════════════════════════════════════════════════════")
+	detalles := fmt.Sprintf(`  Usuario:        %s
+    UID:            %d
+    Grupo:          %s
+    Password:       %s`, nombreUsuario, nuevoUID, grupo, password)
+	salida := utils.SuccessBanner("USUARIO CREADO EXITOSAMENTE", detalles)
+
+	color.Green("===========================================================")
+	color.Green("USUARIO CREADO EXITOSAMENTE")
+	color.Green("===========================================================")
 	color.Cyan("  Usuario:        %s", nombreUsuario)
 	color.Cyan("  UID:            %d", nuevoUID)
 	color.Cyan("  Grupo:          %s", grupo)
 	color.Cyan("  Password:       %s", password)
-	color.Green("═══════════════════════════════════════════════════════════")
+	color.Green("===========================================================")
 
-	return "", false
+	return salida, false
 }
 
 // ExisteUsuario verifica si un usuario ya existe

@@ -83,7 +83,11 @@ func mountPartition(diskName string, nombreParticion string) (string, bool) {
 	if mbr.Mbr_partitions[partIndex].Part_status == 1 {
 		msg := fmt.Sprintf("La partición '%s' ya está montada", nombreParticion)
 		color.Yellow("[MOUNT]: %s", msg)
-		return msg, false
+
+		detalles := fmt.Sprintf(`  Disco:      %s
+    Partición:  %s`, nombreCompleto, nombreParticion)
+		salida := utils.SuccessBanner("⚠ PARTICIÓN YA MONTADA", detalles)
+		return salida, false
 	}
 
 	letra := obtenerLetraDisco(nombreCompleto)
@@ -109,17 +113,31 @@ func mountPartition(diskName string, nombreParticion string) (string, bool) {
 		return msg, true
 	}
 
-	msg := fmt.Sprintf("[MOUNT]: Partición '%s' montada exitosamente. ID: %s", nombreParticion, idParticion)
-	color.Green("═══════════════════════════════════════════════════════════")
-	color.Green("%s", msg)
+	detalles := fmt.Sprintf(`  Partición:  %s
+    Disco:      %s
+    ID:         %s
+    Letra:      %c
+    Correlativo: %d`,
+		nombreParticion,
+		nombreCompleto,
+		idParticion,
+		letra,
+		correlativo)
+
+	salida := utils.SuccessBanner("PARTICIÓN MONTADA EXITOSAMENTE", detalles)
+
+	color.Green("===========================================================")
+	color.Green("PARTICIÓN MONTADA EXITOSAMENTE")
+	color.Green("===========================================================")
+	color.Cyan("  Partición:  %s", nombreParticion)
 	color.Cyan("  Disco:      %s", nombreCompleto)
+	color.Cyan("  ID:         %s", idParticion)
 	color.Cyan("  Letra:      %c", letra)
 	color.Cyan("  Correlativo: %d", correlativo)
-	color.Green("═══════════════════════════════════════════════════════════")
-	return msg, false
-}
+	color.Green("===========================================================")
 
-// Funciones auxiliares (ya debes tenerlas, pero las incluyo por completitud)
+	return salida, false
+}
 
 func calcularCorrelativo(mbr *structures.MBR) int32 {
 	count := int32(0)
@@ -145,7 +163,7 @@ func obtenerLetraDisco(nombreDisco string) byte {
 }
 
 func obtenerCarnetHex() string {
-	carnet := "202308425" // ← CAMBIA ESTO POR TU CARNET
+	carnet := "202308425"
 	if len(carnet) < 2 {
 		return "00"
 	}

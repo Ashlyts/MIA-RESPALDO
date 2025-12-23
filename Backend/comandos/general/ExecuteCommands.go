@@ -103,6 +103,7 @@ func GlobalCom(lista []string) ([]string, []string, int) {
 			salida, err = filecomands.CatExecute(comm, paramsMap)
 		// ... otros
 		default:
+			fmt.Printf("🔍 [%s] → salida: %q, err: %v\n", command, salida, err)
 			salida, err = "Comando no implementado: "+command, true
 		}
 		if err {

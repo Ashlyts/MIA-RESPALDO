@@ -12,7 +12,6 @@ import (
 	"github.com/fatih/color"
 )
 
-// MkgrpExecute maneja el comando mkgrp
 func MkgrpExecute(comando string, parametros map[string]string) (string, bool) {
 	// Verificar sesión activa
 	if global.SesionActiva == nil {
@@ -74,14 +73,18 @@ func crearGrupo(nombreGrupo string) (string, bool) {
 		return "[MKGRP]: Error al escribir en users.txt: " + err.Error(), true
 	}
 
-	color.Green("═══════════════════════════════════════════════════════════")
-	color.Green("✓ GRUPO CREADO EXITOSAMENTE")
-	color.Green("═══════════════════════════════════════════════════════════")
+	detalles := fmt.Sprintf(`  Nombre:         %s
+    GID:            %d`, nombreGrupo, nuevoGID)
+	salida := utils.SuccessBanner("GRUPO CREADO EXITOSAMENTE", detalles)
+
+	color.Green("===========================================================")
+	color.Green("GRUPO CREADO EXITOSAMENTE")
+	color.Green("===========================================================")
 	color.Cyan("  Nombre:         %s", nombreGrupo)
 	color.Cyan("  GID:            %d", nuevoGID)
-	color.Green("═══════════════════════════════════════════════════════════")
+	color.Green("===========================================================")
 
-	return "", false
+	return salida, false
 }
 
 // ExisteGrupo verifica si un grupo ya existe

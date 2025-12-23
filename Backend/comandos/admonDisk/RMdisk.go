@@ -39,8 +39,8 @@ func RmdiskExecute(comando string, props map[string]string) (string, bool) {
 	}
 
 	msg := fmt.Sprintf("[RMDISK]: Disco '%s' eliminado correctamente", diskName)
-	color.Green("═══════════════════════════════════════════════════════════")
-	color.Green("✓ %s", msg)
-	color.Green("═══════════════════════════════════════════════════════════")
+	color.Green("===========================================================")
+	color.Green("%s", msg)
+	color.Green("===========================================================")
 	return msg, false
 }

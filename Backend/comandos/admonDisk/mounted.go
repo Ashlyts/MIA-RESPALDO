@@ -55,13 +55,13 @@ func MountedExecute(comando string, parametros map[string]string) (string, bool)
 	color.White("-----------------------------------------------------------")
 	color.Cyan("Total de particiones montadas: %d", len(particionesMontadas))
 	fmt.Println()
-	color.Green("═══════════════════════════════════════════════════════════")
+	color.Green("===========================================================")
 
 	// === Construir salida para el frontend (texto limpio) ===
 	var salida strings.Builder
-	salida.WriteString("═══════════════════════════════════════════════════════════\n")
+	salida.WriteString("═===========================================================\n")
 	salida.WriteString("       PARTICIONES MONTADAS EN EL SISTEMA\n")
-	salida.WriteString("═══════════════════════════════════════════════════════════\n\n")
+	salida.WriteString("===========================================================\n\n")
 	salida.WriteString(fmt.Sprintf("%-12s %-20s %-20s %-12s\n", "ID", "DISCO", "PARTICIÓN", "CORRELATIVO"))
 	salida.WriteString("-----------------------------------------------------------\n")
 
@@ -75,7 +75,7 @@ func MountedExecute(comando string, parametros map[string]string) (string, bool)
 
 	salida.WriteString("-----------------------------------------------------------\n")
 	salida.WriteString(fmt.Sprintf("Total de particiones montadas: %d\n", len(particionesMontadas)))
-	salida.WriteString("\n═══════════════════════════════════════════════════════════")
+	salida.WriteString("\n===========================================================")
 
 	return salida.String(), false
 }

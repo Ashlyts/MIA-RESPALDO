@@ -7,7 +7,6 @@ import (
 	"encoding/binary"
 	"fmt"
 	"os"
-	"path/filepath"
 	"strings"
 
 	"github.com/fatih/color"
@@ -192,23 +191,25 @@ func particionPrimaria(ubicacionArchivo string, nombreParticion string, tipo byt
 
 	llenarParticionConCeros(file, espacioSeleccionado.Inicio, tamanioBytes)
 
-	// ✅ Mensaje de éxito para el frontend
-	unidadStr := "B"
-	if unidad == 'K' {
-		unidadStr = "KB"
-	} else if unidad == 'M' {
-		unidadStr = "MB"
-	}
-	msg := fmt.Sprintf("[FDISK]: Partición primaria '%s' creada en disco '%s' con tamaño %d %s",
+	detalles := fmt.Sprintf(`  Nombre:         %s
+  Tipo:           Primaria (P)
+  Inicio:         %d bytes
+  Tamaño:         %d bytes (%.2f KB)
+  Ajuste:         %s (%c)
+  Slot MBR:       %d`,
 		nombreParticion,
-		filepath.Base(ubicacionArchivo),
-		tamanioDisco,
-		unidadStr)
+		espacioSeleccionado.Inicio,
+		tamanioBytes,
+		float64(tamanioBytes)/1024.0,
+		map[byte]string{'B': "Best Fit", 'F': "First Fit", 'W': "Worst Fit"}[tipoFit],
+		tipoFit,
+		posSlot)
 
-	// Imprimir en backend
-	color.Green("═══════════════════════════════════════════════════════════")
-	color.Green("✓ PARTICIÓN PRIMARIA CREADA EXITOSAMENTE")
-	color.Green("═══════════════════════════════════════════════════════════")
+	salida := utils.SuccessBanner("PARTICIÓN PRIMARIA CREADA EXITOSAMENTE", detalles)
+
+	color.Green("===========================================================")
+	color.Green("PARTICIÓN PRIMARIA CREADA EXITOSAMENTE")
+	color.Green("===========================================================")
 	color.Cyan("  Nombre:         %s", nombreParticion)
 	color.Cyan("  Tipo:           Primaria (P)")
 	color.Cyan("  Inicio:         %d bytes", espacioSeleccionado.Inicio)
@@ -216,9 +217,9 @@ func particionPrimaria(ubicacionArchivo string, nombreParticion string, tipo byt
 	fitNombre := map[byte]string{'B': "Best Fit", 'F': "First Fit", 'W': "Worst Fit"}
 	color.Cyan("  Ajuste:         %s (%c)", fitNombre[tipoFit], tipoFit)
 	color.Cyan("  Slot MBR:       %d", posSlot)
-	color.Green("═══════════════════════════════════════════════════════════")
+	color.Green("============================================================")
 
-	return msg, false
+	return salida, false
 }
 
 func particionExtendida(ubicacionArchivo string, nombreParticion string, tipo byte, tamanioDisco int32, tipoFit byte, unidad byte) (string, bool) {
@@ -334,23 +335,26 @@ func particionExtendida(ubicacionArchivo string, nombreParticion string, tipo by
 		return msg, true
 	}
 
-	// ✅ Mensaje de éxito para el frontend
-	unidadStr := "B"
-	if unidad == 'K' {
-		unidadStr = "KB"
-	} else if unidad == 'M' {
-		unidadStr = "MB"
-	}
-	msg := fmt.Sprintf("[FDISK]: Partición extendida '%s' creada en disco '%s' con tamaño %d %s",
+	detalles := fmt.Sprintf(`  Nombre:         %s
+  Tipo:           Extendida (E)
+  Inicio:         %d bytes
+  Tamaño:         %d bytes (%.2f KB)
+  Ajuste:         %s (%c)
+  Slot MBR:       %d
+  Nota:           Puede contener particiones lógicas`,
 		nombreParticion,
-		filepath.Base(ubicacionArchivo),
-		tamanioDisco,
-		unidadStr)
+		espacioSeleccionado.Inicio,
+		tamanioBytes,
+		float64(tamanioBytes)/1024.0,
+		map[byte]string{'B': "Best Fit", 'F': "First Fit", 'W': "Worst Fit"}[tipoFit],
+		tipoFit,
+		posSlot)
 
-	// Imprimir en backend
-	color.Green("═══════════════════════════════════════════════════════════")
-	color.Green("✓ PARTICIÓN EXTENDIDA CREADA EXITOSAMENTE")
-	color.Green("═══════════════════════════════════════════════════════════")
+	salida := utils.SuccessBanner("PARTICIÓN EXTENDIDA CREADA EXITOSAMENTE", detalles)
+
+	color.Green("==========================================================")
+	color.Green("PARTICIÓN EXTENDIDA CREADA EXITOSAMENTE")
+	color.Green("==========================================================")
 	color.Cyan("  Nombre:         %s", nombreParticion)
 	color.Cyan("  Tipo:           Extendida (E)")
 	color.Cyan("  Inicio:         %d bytes", espacioSeleccionado.Inicio)
@@ -359,9 +363,10 @@ func particionExtendida(ubicacionArchivo string, nombreParticion string, tipo by
 	color.Cyan("  Ajuste:         %s (%c)", fitNombre[tipoFit], tipoFit)
 	color.Cyan("  Slot MBR:       %d", posSlot)
 	color.Yellow("  Nota:           Puede contener particiones lógicas")
-	color.Green("═══════════════════════════════════════════════════════════")
+	color.Green("==========================================================")
 
-	return msg, false
+	// ✅ Devolver el banner formateado
+	return salida, false
 }
 
 func particionLogica(ubicacionArchivo string, nombreParticion string, tamanioDisco int32, tipoFit byte, unidad byte) (string, bool) {
@@ -382,7 +387,6 @@ func particionLogica(ubicacionArchivo string, nombreParticion string, tamanioDis
 		return msg, true
 	}
 
-	// ✅ CORREGIDO: Buscar partición EXTENDIDA (tipo 'E'), no lógica (tipo 'L')
 	var particionExtendida *structures.Partition
 	for i := range mbr.Mbr_partitions {
 		if mbr.Mbr_partitions[i].Part_type == 'E' && mbr.Mbr_partitions[i].Part_s > 0 {
@@ -449,38 +453,33 @@ func particionLogica(ubicacionArchivo string, nombreParticion string, tamanioDis
 		actualizarEBRAnterior(file, particionExtendida, espacioSeleccionado.Inicio)
 	}
 
-	// ✅ Mensaje de éxito para el frontend
-	unidadStr := "B"
-	if unidad == 'K' {
-		unidadStr = "KB"
-	} else if unidad == 'M' {
-		unidadStr = "MB"
-	}
-	msg := fmt.Sprintf("[FDISK]: Partición lógica '%s' creada en disco '%s' con tamaño %d %s",
+	detalles := fmt.Sprintf(`  Nombre:         %s
+  Tipo:           Lógica (L)
+  Inicio:         %d bytes
+  Tamaño:         %d bytes (%.2f KB)
+  Ajuste:         %s (%c)`,
 		nombreParticion,
-		filepath.Base(ubicacionArchivo),
-		tamanioDisco,
-		unidadStr)
+		nuevoEBR.Part_start,
+		tamanioBytes,
+		float64(tamanioBytes)/1024.0,
+		map[byte]string{'B': "Best Fit", 'F': "First Fit", 'W': "Worst Fit"}[tipoFit],
+		tipoFit)
 
-	// Imprimir en backend
-	color.Green("═══════════════════════════════════════════════════════════")
-	color.Green("✓ PARTICIÓN LÓGICA CREADA EXITOSAMENTE")
-	color.Green("═══════════════════════════════════════════════════════════")
+	salida := utils.SuccessBanner("PARTICIÓN LÓGICA CREADA EXITOSAMENTE", detalles)
+
+	color.Green("===========================================================")
+	color.Green("PARTICIÓN LÓGICA CREADA EXITOSAMENTE")
+	color.Green("===========================================================")
 	color.Cyan("  Nombre:         %s", nombreParticion)
 	color.Cyan("  Tipo:           Lógica (L)")
 	color.Cyan("  Inicio:         %d bytes", nuevoEBR.Part_start)
 	color.Cyan("  Tamaño:         %d bytes (%.2f KB)", tamanioBytes, float64(tamanioBytes)/1024.0)
 	fitNombre := map[byte]string{'B': "Best Fit", 'F': "First Fit", 'W': "Worst Fit"}
 	color.Cyan("  Ajuste:         %s (%c)", fitNombre[tipoFit], tipoFit)
-	color.Green("═══════════════════════════════════════════════════════════")
+	color.Green("===========================================================")
 
-	return msg, false
+	return salida, false
 }
-
-// ... (todas las funciones auxiliares se mantienen IGUALES: crearEBRVacio, encontrarEspaciosLibresEnExtendida, etc.)
-// No es necesario modificarlas porque no retornan mensajes al frontend
-
-// Funciones auxiliares para EBR
 
 func crearEBRVacio() structures.EBR {
 	var ebr structures.EBR

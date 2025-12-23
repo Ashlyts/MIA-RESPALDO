@@ -196,25 +196,44 @@ func formatearEXT2(file *os.File, particion *structures.Partition, id string, no
 	}
 
 	// ==================== RESULTADO ====================
-	color.Green("\n═══════════════════════════════════════════════════════════")
+	detalles := fmt.Sprintf(`  ID:                %s
+    Partición:         %s
+    Sistema Archivos:  EXT2
+    Tipo Formateo:     %s
+    ------------------------------------------------------
+    Total Inodos:      %d
+    Inodos Libres:     %d
+    Total Bloques:     %d
+    Bloques Libres:    %d
+    ------------------------------------------------------
+    Archivos creados:
+        • / (raíz)
+        • /users.txt`,
+		id, nombrePart, tipoFormateo,
+		numeroInodos, numeroInodos-2,
+		numeroBloques, numeroBloques-2)
+
+	salida := utils.SuccessBanner("FORMATEO COMPLETADO EXITOSAMENTE", detalles)
+
+	color.Green("\n===========================================================")
 	color.Green("FORMATEO COMPLETADO EXITOSAMENTE")
-	color.Green("═══════════════════════════════════════════════════════════")
+	color.Green("===========================================================")
 	color.Cyan("  ID:                %s", id)
 	color.Cyan("  Partición:         %s", nombrePart)
 	color.Cyan("  Sistema Archivos:  EXT2")
 	color.Cyan("  Tipo Formateo:     %s", tipoFormateo)
-	color.Green("  ───────────────────────────────────────────────────────")
+	color.Green("-----------------------------------------------------------")
 	color.Cyan("  Total Inodos:      %d", numeroInodos)
 	color.Cyan("  Inodos Libres:     %d", numeroInodos-2)
 	color.Cyan("  Total Bloques:     %d", numeroBloques)
 	color.Cyan("  Bloques Libres:    %d", numeroBloques-2)
-	color.Green("  ───────────────────────────────────────────────────────")
+	color.Green(" ----------------------------------------------------------")
 	color.Yellow("  Archivos creados:")
 	color.White("    • / (raíz)")
 	color.White("    • /users.txt")
-	color.Green("═══════════════════════════════════════════════════════════\n")
+	color.Green("===========================================================\n")
 
-	return "", false
+	return salida, false
 }
 
 func crearSuperBloque(numeroInodos int32, numeroBloques int32, inicioParticion int32, fs string) structures.SuperBloque {
