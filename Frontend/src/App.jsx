@@ -1,7 +1,7 @@
 // src/App.jsx
 import React, { useState } from 'react';
-import CommandInput from './paginas/inputcommand'; // Asegúrate que la ruta sea correcta
-import CommandOutput from './paginas/outcomand'; // Asegúrate que la ruta sea correcta
+import CommandInput from './paginas/inputcommand';
+import CommandOutput from './paginas/outcomand';
 
 function App() {
   const [outputLines, setOutputLines] = useState([]);
@@ -53,66 +53,65 @@ function App() {
   const clearOutput = () => {
     setOutputLines([]);
   };
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-indigo-950 text-gray-100 p-4 md:p-8">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <header className="mb-8 flex justify-between items-center">
-          <h1 className="text-4xl md:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-purple-500 to-pink-500">
+    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-indigo-950 text-gray-100 flex flex-col">
+      {/* Header */}
+      <header className="p-4 border-b border-cyan-700/30 bg-black/20 backdrop-blur-sm">
+        <div className="max-w-7xl mx-auto flex justify-between items-center">
+          <h1 className="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400">
             GoDisk
           </h1>
-          <div className="flex gap-2">
-            {/* Botón de reportes temporal, puedes ocultarlo o dejarlo como placeholder */}
+          <div className="flex gap-3">
             <button
-              onClick={() => alert("Funcionalidad de reportes en construcción. Necesitas react-router-dom para la navegación completa.")}
-              className="px-4 py-2 bg-purple-700 hover:bg-purple-800 transition-colors rounded-md border border-purple-500/50"
+              onClick={() => alert("Funcionalidad de reportes en desarrollo")}
+              className="px-4 py-2 bg-purple-700/70 hover:bg-purple-700 transition-colors rounded-lg border border-purple-500/30 text-sm"
             >
               Reportes
             </button>
             <button
               onClick={clearOutput}
-              className="px-4 py-2 bg-rose-700 hover:bg-rose-800 transition-colors rounded-md border border-rose-500/50"
+              className="px-4 py-2 bg-rose-700/70 hover:bg-rose-700 transition-colors rounded-lg border border-rose-500/30 text-sm"
             >
-              Limpiar Área
+              Limpiar
             </button>
           </div>
-        </header>
+        </div>
+      </header>
 
-        {/* Main Content */}
-        <main className="space-y-8">
-          {/* Input Section */}
-          <section className="bg-gray-800/30 backdrop-blur-sm border border-cyan-500/30 rounded-xl shadow-lg shadow-indigo-950/50 overflow-hidden">
-            <div className="bg-gradient-to-r from-cyan-700/50 to-purple-700/50 px-4 py-2 border-b border-cyan-500/30">
-              <h2 className="text-xl font-semibold flex items-center gap-2">
-                <span className="inline-block w-3 h-3 rounded-full bg-red-500 animate-pulse"></span>
-                Consola de Comandos (Nuevo para Escribir)
-              </h2>
-            </div>
-            <div className="p-4">
-              <CommandInput onExecute={handleCommandExecution} />
-            </div>
-          </section>
+      <main className="flex-1 max-w-7xl mx-auto w-full px-2 md:px-4 py-2 gap-4 flex">
+        {/* Left Panel - Command Console */}
+        <section className="w-1/2 bg-gray-800/40 backdrop-blur-md rounded-xl border border-cyan-600/30 overflow-hidden flex flex-col">
+          <div className="bg-gradient-to-r from-cyan-800/40 to-cyan-900/40 px-4 py-2.5 border-b border-cyan-700/30">
+            <h2 className="font-medium text-cyan-200 flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-green-400"></span>
+              Consola de Comandos
+            </h2>
+          </div>
+          <div className="flex-1 p-3 flex flex-col">
+            <CommandInput onExecute={handleCommandExecution} />
+          </div>
+        </section>
 
-          {/* Output Section */}
-          <section className="bg-gray-800/30 backdrop-blur-sm border border-purple-500/30 rounded-xl shadow-lg shadow-indigo-950/50 overflow-hidden">
-            <div className="bg-gradient-to-r from-purple-700/50 to-pink-700/50 px-4 py-2 border-b border-purple-500/30">
-              <h2 className="text-xl font-semibold flex items-center gap-2">
-                <span className="inline-block w-3 h-3 rounded-full bg-green-500"></span>
-                Salida de Comandos & Visualización de Documentos
-              </h2>
-            </div>
-            <div className="p-4 max-h-[50vh] overflow-y-auto">
-              <CommandOutput lines={outputLines} />
-            </div>
-          </section>
-        </main>
+        <section className="w-1/2 bg-gray-800/40 backdrop-blur-md rounded-xl border border-purple-600/30 overflow-hidden flex flex-col">
+          <div className="bg-gradient-to-r from-purple-800/40 to-purple-900/40 px-4 py-2.5 border-b border-purple-700/30 flex justify-between items-center">
+            <h2 className="font-medium text-purple-200 flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-blue-400"></span>
+              Salida del Sistema
+            </h2>
+            <span className="text-xs bg-gray-700/50 px-2 py-1 rounded">
+              {outputLines.length} mensaje{outputLines.length !== 1 ? 's' : ''}
+            </span>
+          </div>
+          <div className="flex-1 overflow-hidden">
+            <CommandOutput lines={outputLines} />
+          </div>
+        </section>
+      </main>
 
-        {/* Footer */}
-        <footer className="mt-12 text-center text-gray-400 text-sm">
-          <p>Sistema de Archivos EXT2 - Universidad San Carlos de Guatemala</p>
-        </footer>
-      </div>
+      {/* Footer */}
+      <footer className="p-3 text-center text-gray-500 text-xs border-t border-gray-800">
+        <p>Sistema de Archivos EXT2 • USAC 2025</p>
+      </footer>
     </div>
   );
 }

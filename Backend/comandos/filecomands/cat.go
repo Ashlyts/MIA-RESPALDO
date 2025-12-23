@@ -65,14 +65,14 @@ func mostrarContenidoArchivos(rutas []string) (string, bool) {
 		salidaStrings = append(salidaStrings, "---------------------------------------------------------")
 
 		fmt.Printf("\033[36m---------------------------------------------------------\033[0m\n")
-		fmt.Printf("\033[33mArchivo: %s\033[0m\n", ruta)
+		fmt.Printf("\033[33m Archivo: %s\033[0m\n", ruta)
 		fmt.Printf("\033[36m---------------------------------------------------------\033[0m\n")
 
 		// Leer contenido
 		contenido, errCat := utils.LeerArchivoDesdeRuta(file, &sb, ruta)
 		if errCat != nil {
 
-			errorMsg := fmt.Sprintf("✗ Error: %s", errCat.Error())
+			errorMsg := fmt.Sprintf("Error: %s", errCat.Error())
 			salidaStrings = append(salidaStrings, errorMsg)
 
 			fmt.Printf("\033[31m%s\033[0m\n", errorMsg)

@@ -86,7 +86,7 @@ func mountPartition(diskName string, nombreParticion string) (string, bool) {
 
 		detalles := fmt.Sprintf(`  Disco:      %s
     Partición:  %s`, nombreCompleto, nombreParticion)
-		salida := utils.SuccessBanner("⚠ PARTICIÓN YA MONTADA", detalles)
+		salida := utils.SuccessBanner("PARTICIÓN YA MONTADA", detalles)
 		return salida, false
 	}
 

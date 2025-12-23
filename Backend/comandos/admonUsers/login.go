@@ -13,7 +13,6 @@ import (
 	"github.com/fatih/color"
 )
 
-// LoginExecute maneja el comando login
 func LoginExecute(comando string, parametros map[string]string) (string, bool) {
 	// Verificar que no haya sesión activa
 	if global.SesionActiva != nil {
@@ -99,32 +98,29 @@ func iniciarSesion(usuario string, password string, idParticion string) (string,
 		Particion:     particion,
 	}
 
-	// ✅ Generar mensaje formateado (SIN colores, para frontend)
-	salida := fmt.Sprintf(`═══════════════════════════════════════════════════════════
+	salida := fmt.Sprintf(`================================================
 SESIÓN INICIADA EXITOSAMENTE
-═══════════════════════════════════════════════════════════
+================================================
   Usuario:        %s
   UID:            %d
   GID:            %d
   Partición:      %s
   ID:             %s
   Disco:          %s
-═══════════════════════════════════════════════════════════`,
+================================================`,
 		usuario, uid, gid, particionMontada.PartName, idParticion, particionMontada.DiskName)
 
-	// ✅ Opcional: seguir imprimiendo en backend con colores (solo para logs)
-	color.Green("═══════════════════════════════════════════════════════════")
+	color.Green("================================================")
 	color.Green("SESIÓN INICIADA EXITOSAMENTE")
-	color.Green("═══════════════════════════════════════════════════════════")
+	color.Green("================================================")
 	color.Cyan("  Usuario:        %s", usuario)
 	color.Cyan("  UID:            %d", uid)
 	color.Cyan("  GID:            %d", gid)
 	color.Cyan("  Partición:      %s", particionMontada.PartName)
 	color.Cyan("  ID:             %s", idParticion)
 	color.Cyan("  Disco:          %s", particionMontada.DiskName)
-	color.Green("═══════════════════════════════════════════════════════════")
+	color.Green("================================================")
 
-	// ✅ Devolver el mensaje limpio (sin ANSI codes)
 	return salida, false
 }
 
