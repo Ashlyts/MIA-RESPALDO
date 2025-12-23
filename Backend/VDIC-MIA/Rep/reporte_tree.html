@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Reporte de Árbol del Sistema de Archivos</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f9f9f9; }
+        h2 { color: #6a2c70; text-align: center; }
+        .tree-container { position: relative; padding: 20px; }
+        .node {
+            display: inline-block;
+            padding: 8px;
+            margin: 10px;
+            border: 2px solid #666;
+            border-radius: 6px;
+            font-size: 12px;
+            line-height: 1.4;
+            min-width: 120px;
+            text-align: center;
+        }
+        .inode { background: #cce5ff; } /* azul claro */
+        .block-carpeta { background: #ffcccc; } /* rojo claro */
+        .block-archivo { background: #ffffcc; } /* amarillo claro */
+        .block-apuntador { background: #e6f3ff; } /* azul muy claro */
+        .connector {
+            position: absolute;
+            border-left: 2px solid #999;
+            height: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .children {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .node-label {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .node-info {
+            font-size: 10px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <h2>ÁRBOL DEL SISTEMA DE ARCHIVOS</h2>
+    <div class="tree-container">
+        <div class="node inode" style="margin-left: 0px;">
+            <div class="node-label">Inodo 0</div>
+            <div class="node-info">i_type: 48<br/>i_uid: 1<br/>i_gid: 1<br/>i_s: 0<br/>i_perm: 664</div>
+        </div>
+    </div>
+    <p style="text-align: center; margin-top: 30px; color: #666;">
+        Reporte de Árbol generado el 2025/12/23 (17:03:41)
+    </p>
+</body>
+</html>

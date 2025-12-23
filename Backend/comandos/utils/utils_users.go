@@ -140,17 +140,13 @@ func BuscarEnCarpeta(file *os.File, sb *structures.SuperBloque, inodoCarpeta *st
 // LeerInodo lee un inodo por su índice
 func LeerInodo(file *os.File, sb *structures.SuperBloque, indice int32) (structures.TablaInodo, error) {
 	var inodo structures.TablaInodo
-
-	posicion := sb.S_inode_start + (indice * size.SizeTablaInodo())
-
+	posicion := sb.S_inode_start + (indice * sb.S_inode_s) // ¡Usar S_inode_s!
 	if _, err := file.Seek(int64(posicion), 0); err != nil {
 		return inodo, err
 	}
-
 	if err := binary.Read(file, binary.LittleEndian, &inodo); err != nil {
 		return inodo, err
 	}
-
 	return inodo, nil
 }
 

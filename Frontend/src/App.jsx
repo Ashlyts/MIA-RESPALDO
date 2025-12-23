@@ -5,6 +5,9 @@ import CommandOutput from './paginas/outcomand';
 
 function App() {
   const [outputLines, setOutputLines] = useState([]);
+  const [showReports, setShowReports] = useState(false);
+  const [reportFiles, setReportFiles] = useState([]);
+  const [loadingReports, setLoadingReports] = useState(false);
 
   const handleCommandExecution = async (commandText) => {
     const lines = commandText.split('\n').map(line => line.trim()).filter(line => line);
@@ -24,12 +27,11 @@ function App() {
 
       let jsonData;
       try {
-        jsonData = await response.json(); 
+        jsonData = await response.json();
       } catch (parseError) {
         throw new Error(`Error al parsear JSON: ${parseError.message}`);
       }
 
-      // Extraer el contenido de 'data' (array de strings)
       const outputLines = jsonData.data || [];
       const outputText = outputLines.join('\n') || 'Comando ejecutado sin salida.';
 
@@ -50,9 +52,25 @@ function App() {
     }
   };
 
+  const loadReports = async () => {
+    setLoadingReports(true);
+    try {
+      const response = await fetch('http://localhost:9600/reportes/list');
+      if (!response.ok) throw new Error('Error al cargar reportes');
+      const data = await response.json();
+      setReportFiles(data.data || []);
+    } catch (error) {
+      alert('Error al cargar la lista de reportes: ' + error.message);
+      setReportFiles([]);
+    } finally {
+      setLoadingReports(false);
+    }
+  };
+
   const clearOutput = () => {
     setOutputLines([]);
   };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-indigo-950 text-gray-100 flex flex-col">
       {/* Header */}
@@ -63,7 +81,10 @@ function App() {
           </h1>
           <div className="flex gap-3">
             <button
-              onClick={() => alert("Funcionalidad de reportes en desarrollo")}
+              onClick={() => {
+                setShowReports(true);
+                loadReports();
+              }}
               className="px-4 py-2 bg-purple-700/70 hover:bg-purple-700 transition-colors rounded-lg border border-purple-500/30 text-sm"
             >
               Reportes
@@ -92,6 +113,7 @@ function App() {
           </div>
         </section>
 
+        {/* Right Panel - Output */}
         <section className="w-1/2 bg-gray-800/40 backdrop-blur-md rounded-xl border border-purple-600/30 overflow-hidden flex flex-col">
           <div className="bg-gradient-to-r from-purple-800/40 to-purple-900/40 px-4 py-2.5 border-b border-purple-700/30 flex justify-between items-center">
             <h2 className="font-medium text-purple-200 flex items-center gap-2">
@@ -112,6 +134,67 @@ function App() {
       <footer className="p-3 text-center text-gray-500 text-xs border-t border-gray-800">
         <p>Sistema de Archivos EXT2 • USAC 2025</p>
       </footer>
+
+      {/* Modal de Reportes */}
+      {showReports && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-gray-800/90 border border-purple-500/50 rounded-xl w-full max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
+            <div className="bg-gradient-to-r from-purple-800/60 to-pink-800/60 px-6 py-4 flex justify-between items-center">
+              <h2 className="text-xl font-bold text-white">Reportes Generados</h2>
+              <button
+                onClick={() => setShowReports(false)}
+                className="text-gray-300 hover:text-white text-2xl"
+              >
+                &times;
+              </button>
+            </div>
+            <div className="p-4 flex-1 overflow-y-auto">
+              {loadingReports ? (
+                <p className="text-center text-gray-400">Cargando...</p>
+              ) : reportFiles.length === 0 ? (
+                <p className="text-center text-gray-500">No hay reportes generados aún.</p>
+              ) : (
+                <ul className="space-y-2">
+                  {reportFiles.map((file, index) => (
+                    <li key={index} className="flex justify-between items-center bg-gray-900/50 p-3 rounded-lg border border-gray-700">
+                      <span className="text-cyan-200 font-mono">{file}</span>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => window.open(`http://localhost:9600/rep/${file}`, '_blank')}
+                          className="px-3 py-1 bg-cyan-700 hover:bg-cyan-600 text-xs rounded text-white"
+                        >
+                          Ver
+                        </button>
+                        <button
+                          onClick={() => {
+                            const link = document.createElement('a');
+                            link.href = `http://localhost:9600/rep/${file}`;
+                            link.download = file;
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                          }}
+                          className="px-3 py-1 bg-purple-700 hover:bg-purple-600 text-xs rounded text-white"
+                        >
+                          Descargar
+                        </button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+            <div className="px-4 py-3 bg-gray-900/50 flex justify-end">
+              <button
+                onClick={() => setShowReports(false)}
+                className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

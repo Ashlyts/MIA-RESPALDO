@@ -1,7 +1,6 @@
 package size
 
 import (
-	// "proyecto/estructuras/structures"
 	"Proyecto/Estructuras/structures"
 	"unsafe"
 )

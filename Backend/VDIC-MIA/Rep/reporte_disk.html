@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Reporte de Disco</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f9f9f9; }
+        h2 { color: #6a2c70; text-align: center; }
+        .disco-container { display: flex; justify-content: center; margin: 30px 0; }
+        .disco-barra { 
+            width: 90%; 
+            height: 60px; 
+            border: 2px solid #6a2c70; 
+            display: flex; 
+            position: relative;
+        }
+        .segmento {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: #000;
+            text-align: center;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+        .mbr { background-color: #e9d8fd; }
+        .primaria { background-color: #d9f2d9; }
+        .extendida { background-color: #fff2cc; }
+        .libre { background-color: #cce5ff; }
+        .leyenda {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .leyenda-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .color-indicador {
+            width: 20px;
+            height: 20px;
+            border: 1px solid #666;
+        }
+        .tabla-resumen {
+            margin: 30px auto;
+            border-collapse: collapse;
+            width: 90%;
+        }
+        .tabla-resumen th,
+        .tabla-resumen td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+        .tabla-resumen th {
+            background-color: #6a2c70;
+            color: white;
+        }
+        .tabla-resumen tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h2>REPORTE DE DISCO — VDIC-A.mia</h2>
+
+    <div class="disco-container">
+        <div class="disco-barra"><div class="segmento mbr" style="flex: 0 0 1.00%;" title="MBR (0.00%)">
+                MBR
+            </div><div class="segmento primaria" style="flex: 0 0 40.00%;" title="ParticionPrueba (40.00%)">
+                ParticionPru…
+            </div><div class="segmento extendida" style="flex: 0 0 30.00%;" title="Extendida1 (30.00%)">
+                Extendida1
+            </div><div class="segmento libre" style="flex: 0 0 30.00%;" title="Libre (30.00%)">
+                Libre
+            </div></div></div>
+
+    <table class="tabla-resumen">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Tipo</th>
+                <th>Inicio (bytes)</th>
+                <th>Tamaño (bytes)</th>
+                <th>Porcentaje</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>MBR</td>
+                <td>MBR</td>
+                <td>0</td>
+                <td>153</td>
+                <td>0.00%</td>
+            </tr>
+            <tr>
+                <td>ParticionPrueba</td>
+                <td>Primaria</td>
+                <td>153</td>
+                <td>209715200</td>
+                <td>40.00%</td>
+            </tr>
+            <tr>
+                <td>Extendida1</td>
+                <td>Extendida</td>
+                <td>209715353</td>
+                <td>157286400</td>
+                <td>30.00%</td>
+            </tr>
+            <tr>
+                <td>Libre</td>
+                <td>Libre</td>
+                <td>367001753</td>
+                <td>157286247</td>
+                <td>30.00%</td>
+            </tr></tbody></table>
+
+    <div class="leyenda">
+        <div class="leyenda-item">
+            <div class="color-indicador mbr"></div>
+            <span>MBR</span>
+        </div>
+        <div class="leyenda-item">
+            <div class="color-indicador primaria"></div>
+            <span>Primaria</span>
+        </div>
+        <div class="leyenda-item">
+            <div class="color-indicador extendida"></div>
+            <span>Extendida</span>
+        </div>
+        <div class="leyenda-item">
+            <div class="color-indicador libre"></div>
+            <span>Libre</span>
+        </div>
+    </div>
+
+    <p style="text-align: center; margin-top: 40px; color: #666;">
+        Reporte de Disco generado el 2025/12/23 (17:03:17)
+    </p>
+</body>
+</html>

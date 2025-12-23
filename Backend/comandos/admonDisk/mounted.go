@@ -1,6 +1,7 @@
 package admonDisk
 
 import (
+	"Proyecto/Estructuras/structures"
 	"Proyecto/comandos/utils"
 	"fmt"
 	"os"
@@ -17,6 +18,7 @@ type ParticionMontada struct {
 	PartName    string
 	Correlative int32
 	DiskPath    string
+	Partition   structures.Partition
 }
 
 // MountedExecute muestra TODAS las particiones montadas y retorna la salida para el frontend
@@ -112,6 +114,7 @@ func leerParticionesMontadasDelSistema() ([]ParticionMontada, error) {
 					PartName:    partName,
 					Correlative: part.Part_correlative,
 					DiskPath:    diskPath,
+					Partition:   part,
 				})
 			}
 		}

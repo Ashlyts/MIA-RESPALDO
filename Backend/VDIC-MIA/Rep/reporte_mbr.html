@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Reporte de MBR + EBRs</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f9f9f9; }
+        h2 { color: #6a2c70; }
+        table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
+        th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
+        th { background-color: #6a2c70; color: white; }
+        tr:nth-child(even) { background-color: #f2f2f2; }
+        .particion-primaria { background-color: #e9d8fd; }
+        .particion-extendida { background-color: #c8e6c9; }
+        .particion-logica { background-color: #ffecb3; }
+        .titulo { background-color: #6a2c70; color: white; font-weight: bold; }
+        .seccion { margin-top: 30px; }
+    </style>
+</head>
+<body>
+    <h2>REPORTE DE MBR + EBRs — Disco: VDIC-A.mia</h2>
+
+    <table>
+        <tr class="titulo">
+            <th colspan="2">Información General del MBR</th>
+        </tr>
+        <tr><td>mbr_tamano</td><td>524288000</td></tr>
+        <tr><td>mbr_fecha_creacion</td><td>2025/12/23 (16:49:19)</td></tr>
+        <tr><td>mbr_disk_signature</td><td>593615</td></tr>
+        <tr><td>dsk_fit</td><td>F</td></tr>
+    </table>
+
+    <table>
+        <tr class="particion-primaria">
+            <th colspan="2">Partición 1 (P)</th>
+        </tr>
+        <tr><td>part_status</td><td>Active</td></tr>
+        <tr><td>part_type</td><td>P</td></tr>
+        <tr><td>part_fit</td><td>W</td></tr>
+        <tr><td>part_start</td><td>153</td></tr>
+        <tr><td>part_size</td><td>209715200</td></tr>
+        <tr><td>part_name</td><td>ParticionPrueba</td></tr>
+        <tr><td>part_correlative</td><td>1</td></tr>
+    </table>
+
+    <table>
+        <tr class="particion-extendida">
+            <th colspan="2">Partición 2 (E)</th>
+        </tr>
+        <tr><td>part_status</td><td>Inactive</td></tr>
+        <tr><td>part_type</td><td>E</td></tr>
+        <tr><td>part_fit</td><td>W</td></tr>
+        <tr><td>part_start</td><td>209715353</td></tr>
+        <tr><td>part_size</td><td>157286400</td></tr>
+        <tr><td>part_name</td><td>Extendida1</td></tr>
+        <tr><td>part_correlative</td><td>-1</td></tr>
+    </table>
+
+    <table>
+        <tr class="particion-logica">
+            <th colspan="2">EBR #1 (Unidad Lógica)</th>
+        </tr>
+        <tr><td>part_mount</td><td>Unmounted</td></tr>
+        <tr><td>part_fit</td><td>W</td></tr>
+        <tr><td>part_start</td><td>209715383</td></tr>
+        <tr><td>part_size</td><td>20971520</td></tr>
+        <tr><td>part_next</td><td>230686903</td></tr>
+        <tr><td>part_name</td><td>Logica1</td></tr>
+    </table>
+
+    <table>
+        <tr class="particion-logica">
+            <th colspan="2">EBR #2 (Unidad Lógica)</th>
+        </tr>
+        <tr><td>part_mount</td><td>Unmounted</td></tr>
+        <tr><td>part_fit</td><td>W</td></tr>
+        <tr><td>part_start</td><td>230686933</td></tr>
+        <tr><td>part_size</td><td>10240</td></tr>
+        <tr><td>part_next</td><td>230697173</td></tr>
+        <tr><td>part_name</td><td>Logica2</td></tr>
+    </table>
+
+    <table>
+        <tr class="particion-logica">
+            <th colspan="2">EBR #3 (Unidad Lógica)</th>
+        </tr>
+        <tr><td>part_mount</td><td>Unmounted</td></tr>
+        <tr><td>part_fit</td><td>W</td></tr>
+        <tr><td>part_start</td><td>230697203</td></tr>
+        <tr><td>part_size</td><td>10240</td></tr>
+        <tr><td>part_next</td><td>-1</td></tr>
+        <tr><td>part_name</td><td>Logica3</td></tr>
+    </table>
+
+    <table>
+        <tr class="particion-primaria">
+            <th colspan="2">Partición 3 (P)</th>
+        </tr>
+        <tr><td>part_status</td><td>Inactive</td></tr>
+        <tr><td>part_type</td><td>P</td></tr>
+        <tr><td>part_fit</td><td>F</td></tr>
+        <tr><td>part_start</td><td>-1</td></tr>
+        <tr><td>part_size</td><td>-1</td></tr>
+        <tr><td>part_name</td><td>N/A</td></tr>
+        <tr><td>part_correlative</td><td>-1</td></tr>
+    </table>
+
+    <table>
+        <tr class="particion-primaria">
+            <th colspan="2">Partición 4 (P)</th>
+        </tr>
+        <tr><td>part_status</td><td>Inactive</td></tr>
+        <tr><td>part_type</td><td>P</td></tr>
+        <tr><td>part_fit</td><td>F</td></tr>
+        <tr><td>part_start</td><td>-1</td></tr>
+        <tr><td>part_size</td><td>-1</td></tr>
+        <tr><td>part_name</td><td>N/A</td></tr>
+        <tr><td>part_correlative</td><td>-1</td></tr>
+    </table>
+
+    <p style="text-align: center; margin-top: 40px; color: #666;">
+        Reporte de MBR y EBRs generado el 2025/12/23 (17:03:17)
+    </p>
+</body>
+</html>

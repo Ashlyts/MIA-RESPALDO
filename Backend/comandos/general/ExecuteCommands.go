@@ -2,6 +2,7 @@
 package general
 
 import (
+	"Proyecto/Reportes"
 	"Proyecto/comandos"
 	"Proyecto/comandos/admonUsers"
 	"Proyecto/comandos/filecomands"
@@ -114,7 +115,7 @@ func GlobalCom(lista []string) ([]string, []string, int) {
 			salida, err = admonUsers.LoginExecute(comm, paramsMap)
 		case "logout":
 			salida, err = admonUsers.LogoutExecute(comm, paramsMap)
-		case "mkdisk", "fdisk", "rmdisk", "mount", "mounted", "mkfs", "rep": // Añadido "rep" si lo manejas en comandos.DiskExecuteWithOutput
+		case "mkdisk", "fdisk", "rmdisk", "mount", "mounted", "mkfs": // Añadido "rep" si lo manejas en comandos.DiskExecuteWithOutput
 			salida, err = comandos.DiskExecuteWithOutput(command, paramsMap)
 		case "mkgrp":
 			salida, err = filecomands.MkgrpExecute(comm, paramsMap)
@@ -126,7 +127,8 @@ func GlobalCom(lista []string) ([]string, []string, int) {
 			salida, err = filecomands.MkdirExecute(comm, paramsMap)
 		case "mkfile":
 			salida, err = filecomands.MkfileExecute(comm, paramsMap)
-		// ... otros comandos si los añades
+		case "rep":
+			salida, err = Reportes.RepExecute(comm, paramsMap)
 		default:
 			// Si el comando no está en ninguno de los casos anteriores
 			salida, err = "Comando no implementado: "+command, true
