@@ -108,6 +108,14 @@ var commands = map[string]CommandDef{
 		Defaults: map[string]string{},
 		Run:      filecomands.MkusrExecute,
 	},
+	"mkfile": {
+		Allowed: map[string]bool{
+			"path": true, "cont": true, "size": true, "r": true,
+		},
+		Required: []string{"path"},
+		Defaults: map[string]string{},
+		Run:      filecomands.MkfileExecute,
+	},
 }
 
 func DiskCommandProps(comando string, instrucciones []string) (string, bool) {

@@ -1,3 +1,4 @@
+// general/general.go
 package general
 
 import (
@@ -23,7 +24,13 @@ func DetectGroup(cmd string) (string, string, bool, string) {
 		return "", "", true, "Comando vacío"
 	}
 
-	commandOnly := strings.Split(parts[0], "-")[0]
+	// Extraer el nombre del comando
+	commandOnly := parts[0]
+	// Eliminar el prefijo "-" si existe (esto es para manejar casos raros o errores de parsing)
+	// Pero normalmente no debería ser necesario aquí si se parsea bien el comando
+	// if strings.HasPrefix(commandOnly, "-") {
+	// 	commandOnly = commandOnly[1:]
+	// }
 	cmdLower := strings.ToLower(strings.TrimSpace(commandOnly))
 
 	for group, cmds := range commandGroups {
@@ -59,14 +66,28 @@ func GlobalCom(lista []string) ([]string, []string, int) {
 
 	for _, comm := range lista {
 		comm = strings.TrimSpace(comm)
-		if comm == "" || strings.HasPrefix(comm, "#") {
-			salidas = append(salidas, "Línea vacía o comentario ignorado")
+		// --- MODIFICACIÓN: NO IGNORAR COMENTARIOS NI LINEAS VACIAS ---
+		// if comm == "" || strings.HasPrefix(comm, "#") {
+		// 	salidas = append(salidas, "Línea vacía o comentario ignorado")
+		// 	continue
+		// }
+
+		// Agregar comentario o línea vacía directamente a salidas
+		if comm == "" {
+			salidas = append(salidas, "") // Añadir línea vacía
 			continue
 		}
+		if strings.HasPrefix(comm, "#") {
+			salidas = append(salidas, comm) // Añadir comentario tal cual
+			continue
+		}
+		// --- FIN MODIFICACIÓN ---
+
 		fmt.Printf("Procesando comando: [%s]\n", comm)
 		parts := strings.Fields(comm)
 		fmt.Printf("Partes: %+v\n", parts)
 		if len(parts) == 0 {
+			// Este caso debería ser raro ahora, pero por si acaso
 			salidas = append(salidas, "Comando vacío")
 			continue
 		}
@@ -93,7 +114,7 @@ func GlobalCom(lista []string) ([]string, []string, int) {
 			salida, err = admonUsers.LoginExecute(comm, paramsMap)
 		case "logout":
 			salida, err = admonUsers.LogoutExecute(comm, paramsMap)
-		case "mkdisk", "fdisk", "rmdisk", "mount", "mounted", "mkfs":
+		case "mkdisk", "fdisk", "rmdisk", "mount", "mounted", "mkfs", "rep": // Añadido "rep" si lo manejas en comandos.DiskExecuteWithOutput
 			salida, err = comandos.DiskExecuteWithOutput(command, paramsMap)
 		case "mkgrp":
 			salida, err = filecomands.MkgrpExecute(comm, paramsMap)
@@ -101,9 +122,13 @@ func GlobalCom(lista []string) ([]string, []string, int) {
 			salida, err = filecomands.MkusrExecute(comm, paramsMap)
 		case "cat":
 			salida, err = filecomands.CatExecute(comm, paramsMap)
-		// ... otros
+		case "mkdir":
+			salida, err = filecomands.MkdirExecute(comm, paramsMap)
+		case "mkfile":
+			salida, err = filecomands.MkfileExecute(comm, paramsMap)
+		// ... otros comandos si los añades
 		default:
-			fmt.Printf("🔍 [%s] → salida: %q, err: %v\n", command, salida, err)
+			// Si el comando no está en ninguno de los casos anteriores
 			salida, err = "Comando no implementado: "+command, true
 		}
 		if err {

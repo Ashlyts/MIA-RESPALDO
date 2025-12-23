@@ -11,7 +11,6 @@ import (
 	"strings"
 )
 
-// LeerSuperBloque lee el SuperBloque de la partición.
 func LeerSuperBloque(file *os.File, inicioParticion int32) (structures.SuperBloque, error) {
 	var sb structures.SuperBloque
 

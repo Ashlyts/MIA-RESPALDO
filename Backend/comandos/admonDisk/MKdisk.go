@@ -52,9 +52,9 @@ func mkdisk_Create(_size int32, _unit byte, _fit byte) (string, bool) {
 			}
 
 			msg := fmt.Sprintf("[MKDISK]: Disco '%s' creado exitosamente con tamaño %d %s", nombreDisco, _size, unidadStr)
-			color.Green("═══════════════════════════════════════════════════════════")
+			color.Green("===========================================================")
 			color.Green(" %s", msg)
-			color.Green("═══════════════════════════════════════════════════════════")
+			color.Green("===========================================================")
 
 			// Retornar el mismo mensaje para el frontend
 			return msg, false
