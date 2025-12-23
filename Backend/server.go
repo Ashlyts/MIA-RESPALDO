@@ -18,13 +18,13 @@ func main() {
 
 	// Manejar las rutas
 	mux.HandleFunc("/commands", controllers.HandleCommand)
-	// mux.HandleFunc("/login", handleLogin)
-	// mux.HandleFunc("/logout", handleLogout)
+	//mux.HandleFunc("/login", controllers.HandleLogin)
+	//mux.HandleFunc("/logout", controllers.HandleLogout)
+	//mux.HandleFunc("/cat", controllers.HandleCat)
 	// mux.HandleFunc("/obtainmbr", handleObtainMBR)
 	// mux.HandleFunc("/reportesobtener", handleReportsObtener)
 	// mux.HandleFunc("/graphs", handleGraph)
 	// mux.HandleFunc("/obtain-carpetas-archivos", handleObtainCarpetasArchivos)
-	// mux.HandleFunc("/cat", handleCat) //-------Nuevo
 
 	// handler := c.Handler(mux)
 	handler := middlewares.RecoverMiddleware(c.Handler(mux))

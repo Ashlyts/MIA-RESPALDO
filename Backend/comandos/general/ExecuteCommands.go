@@ -2,6 +2,9 @@ package general
 
 import (
 	"Proyecto/comandos"
+	"Proyecto/comandos/admonUsers"
+	"Proyecto/comandos/filecomands"
+	"fmt"
 	"strings"
 )
 
@@ -15,13 +18,11 @@ var commandGroups = map[string][]string{
 }
 
 func DetectGroup(cmd string) (string, string, bool, string) {
-	// Extraer solo el comando (primera palabra o hasta primer espacio/parámetro)
 	parts := strings.Fields(cmd)
 	if len(parts) == 0 {
 		return "", "", true, "Comando vacío"
 	}
 
-	// Si tiene parámetros con -, extraer solo la palabra antes del primer -
 	commandOnly := strings.Split(parts[0], "-")[0]
 	cmdLower := strings.ToLower(strings.TrimSpace(commandOnly))
 
@@ -51,21 +52,26 @@ func ParseParamList(raw []string) map[string]string {
 	return params
 }
 
-// error, mssgEror, comandos
-// En general/general.go
 func GlobalCom(lista []string) ([]string, []string, int) {
 	var errores []string
 	var salidas []string
 	var contErrores = 0
 
 	for _, comm := range lista {
-		cmdParts := strings.Fields(comm)
-		if len(cmdParts) == 0 {
-			salidas = append(salidas, "Línea vacía ignorada")
+		comm = strings.TrimSpace(comm)
+		if comm == "" || strings.HasPrefix(comm, "#") {
+			salidas = append(salidas, "Línea vacía o comentario ignorado")
+			continue
+		}
+		fmt.Printf("Procesando comando: [%s]\n", comm)
+		parts := strings.Fields(comm)
+		fmt.Printf("Partes: %+v\n", parts)
+		if len(parts) == 0 {
+			salidas = append(salidas, "Comando vacío")
 			continue
 		}
 
-		group, command, blnError, strError := DetectGroup(comm)
+		_, command, blnError, strError := DetectGroup(comm)
 		if blnError {
 			msg := "Error: " + strError
 			errores = append(errores, msg)
@@ -74,28 +80,31 @@ func GlobalCom(lista []string) ([]string, []string, int) {
 			continue
 		}
 
-		paramsList := ObtenerParametros(comm)
-		paramsMap := ParseParamList(paramsList)
+		resto := strings.Join(parts[1:], " ")
+		fmt.Printf("Resto (para parámetros): [%s]\n", resto)
+		paramsMap := ObtenerParametros(resto)
+		fmt.Printf("Parámetros parseados: %+v\n", paramsMap)
+
 		var salida string
 		var err bool
 
-		switch group {
-		case "disk":
+		switch command { // ← usa 'command', no 'group'
+		case "login":
+			salida, err = admonUsers.LoginExecute(comm, paramsMap)
+		case "logout":
+			salida, err = admonUsers.LogoutExecute(comm, paramsMap)
+		case "mkdisk", "fdisk", "rmdisk", "mount", "mounted", "mkfs":
 			salida, err = comandos.DiskExecuteWithOutput(command, paramsMap)
-		case "reports":
-			salida, err = "Reportes aún no implementados", true
-		case "files":
-			salida, err = "Manejo de archivos aún no implementado", true
+		case "mkgrp":
+			salida, err = filecomands.MkgrpExecute(comm, paramsMap)
+		case "mkusr":
+			salida, err = filecomands.MkusrExecute(comm, paramsMap)
 		case "cat":
-			salida, err = "Comando CAT aún no implementado", true
-		case "users":
-			salida, err = "Gestión de usuarios aún no implementada", true
-		case "groups":
-			salida, err = "Gestión de grupos aún no implementada", true
+			salida, err = filecomands.CatExecute(comm, paramsMap)
+		// ... otros
 		default:
-			salida, err = "Grupo de comando desconocido", true
+			salida, err = "Comando no implementado: "+command, true
 		}
-
 		if err {
 			errores = append(errores, salida)
 			contErrores++

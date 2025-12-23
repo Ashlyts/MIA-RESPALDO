@@ -2,7 +2,9 @@ package comandos
 
 import (
 	"Proyecto/comandos/admonDisk"
+	"Proyecto/comandos/admonFS"
 	"Proyecto/comandos/admonUsers"
+	"Proyecto/comandos/filecomands"
 
 	/*royecto/comandos/admonUsers"*/
 	"fmt"
@@ -63,7 +65,7 @@ var commands = map[string]CommandDef{
 		},
 		Required: []string{"id"},
 		Defaults: map[string]string{"type": "FULL"},
-		Run:      admonUsers.MkfsExecute,
+		Run:      admonFS.MkfsExecute,
 	},
 	"cat": {
 		Allowed: map[string]bool{
@@ -72,7 +74,7 @@ var commands = map[string]CommandDef{
 		},
 		Required: []string{"file1"},
 		Defaults: map[string]string{},
-		Run:      admonUsers.CatExecute,
+		Run:      filecomands.CatExecute,
 	},
 	// En el mapa commands, agregar después de "cat":
 
@@ -96,7 +98,7 @@ var commands = map[string]CommandDef{
 		},
 		Required: []string{"name"},
 		Defaults: map[string]string{},
-		Run:      admonUsers.MkgrpExecute,
+		Run:      filecomands.MkgrpExecute,
 	},
 	"mkusr": {
 		Allowed: map[string]bool{
@@ -104,7 +106,7 @@ var commands = map[string]CommandDef{
 		},
 		Required: []string{"user", "pass", "grp"},
 		Defaults: map[string]string{},
-		Run:      admonUsers.MkusrExecute,
+		Run:      filecomands.MkusrExecute,
 	},
 }
 

@@ -1,20 +1,22 @@
 package admonUsers
 
 import (
+	"Proyecto/comandos/global"
+
 	"github.com/fatih/color"
 )
 
 // LogoutExecute maneja el comando logout
 func LogoutExecute(comando string, parametros map[string]string) (string, bool) {
 	// Verificar que haya sesión activa
-	if SesionActiva == nil {
+	if global.SesionActiva == nil {
 		return "[LOGOUT]: No hay sesión activa", true
 	}
 
-	usuarioSaliente := SesionActiva.UsuarioActual
+	usuarioSaliente := global.SesionActiva.UsuarioActual
 
 	// Cerrar sesión
-	SesionActiva = nil
+	global.SesionActiva = nil
 
 	color.Green("═══════════════════════════════════════════════════════════")
 	color.Green("✓ SESIÓN CERRADA EXITOSAMENTE")

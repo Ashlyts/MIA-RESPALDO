@@ -1,4 +1,5 @@
-package admonUsers
+// admonFS/mkfs.go
+package admonFS
 
 import (
 	"Proyecto/Estructuras/size"
@@ -7,14 +8,12 @@ import (
 	"Proyecto/comandos/utils"
 	"encoding/binary"
 	"fmt"
-	"math"
 	"os"
 	"strings"
 
 	"github.com/fatih/color"
 )
 
-// mkfsExecute maneja el comando mkfs
 func MkfsExecute(comando string, parametros map[string]string) (string, bool) {
 	// Validar parámetro obligatorio: id
 	idParam := parametros["id"]
@@ -22,10 +21,7 @@ func MkfsExecute(comando string, parametros map[string]string) (string, bool) {
 		return "[MKFS]: Parámetro -id es obligatorio", true
 	}
 
-	// Limpiar el ID (NO convertir a entero, es una cadena)
 	id := strings.TrimSpace(idParam)
-
-	// Validar longitud del ID
 	if len(id) < 3 || len(id) > 5 {
 		return fmt.Sprintf("[MKFS]: ID inválido '%s'", id), true
 	}
@@ -35,22 +31,29 @@ func MkfsExecute(comando string, parametros map[string]string) (string, bool) {
 	if tipoFormateo == "" {
 		tipoFormateo = "FULL"
 	}
-
 	if tipoFormateo != "FULL" {
 		return "Solo se soporta formateo FULL", true
 	}
 
-	return formatearParticion(id, tipoFormateo)
+	// Validar parámetro opcional: fs (por defecto 2fs) - Añadido según enunciado
+	fs := strings.ToLower(strings.TrimSpace(parametros["fs"]))
+	if fs == "" {
+		fs = "2fs"
+	}
+	if fs != "2fs" {
+		return "Solo se soporta sistema de archivos 2fs", true
+	}
+
+	return formatearParticion(id, tipoFormateo, fs)
 }
 
-func formatearParticion(id string, tipoFormateo string) (string, bool) {
+func formatearParticion(id string, tipoFormateo string, fs string) (string, bool) {
 	// Buscar la partición montada por ID
 	particionMontada, err := admonDisk.GetMountedPartitionByID(id)
 	if err != nil {
 		return fmt.Sprintf("Partición con ID '%s' no encontrada o no montada", id), true
 	}
 
-	// Abrir el disco
 	file, errOpen := os.OpenFile(particionMontada.DiskPath, os.O_RDWR, 0666)
 	if errOpen != nil {
 		return "[MKFS]: Error al abrir el disco", true
@@ -64,59 +67,93 @@ func formatearParticion(id string, tipoFormateo string) (string, bool) {
 	}
 
 	// Buscar la partición en el MBR
-	partIndex := -1
+	var particion *structures.Partition
 	for i := 0; i < 4; i++ {
 		partName := utils.ConvertirByteAString(mbr.Mbr_partitions[i].Part_name[:])
 		if partName == particionMontada.PartName {
-			partIndex = i
+			particion = &mbr.Mbr_partitions[i]
 			break
 		}
 	}
 
-	if partIndex == -1 {
+	if particion == nil {
 		return "Partición no encontrada en el MBR", true
 	}
-
-	particion := mbr.Mbr_partitions[partIndex]
 
 	// Verificar que sea partición primaria
 	if particion.Part_type != 'P' {
 		return "Solo se pueden formatear particiones primarias", true
 	}
 
-	// Realizar el formateo EXT2
-	return formatearEXT2(file, &particion, id, particionMontada.PartName)
+	return formatearEXT2(file, particion, id, particionMontada.PartName, tipoFormateo, fs)
 }
 
-func formatearEXT2(file *os.File, particion *structures.Partition, id string, nombrePart string) (string, bool) {
+func formatearEXT2(file *os.File, particion *structures.Partition, id string, nombrePart string, tipoFormateo string, fs string) (string, bool) {
 	tamanioParticion := particion.Part_s
 	inicioParticion := particion.Part_start
 
-	// Calcular número de estructuras según fórmula del proyecto
-	// tamaño_particion = sizeof(superblock) + n + 3*n + n*sizeof(inodos) + 3*n*sizeof(block)
-	// Despejando n:
-	n := float64(tamanioParticion-size.SizeSuperBloque()) /
-		float64(4+size.SizeTablaInodo()+3*size.SizeBloqueArchivo())
+	if tamanioParticion <= size.SizeSuperBloque() {
+		return "Partición demasiado pequeña para formatear", true
+	}
 
-	numeroEstructuras := int32(math.Floor(n))
-	numeroBloques := 3 * numeroEstructuras
+	// === CÁLCULO REALISTA DE ESTRUCTURAS ===
+	// Tamaño disponible después del SuperBloque
+	tamanioDisponible := int64(tamanioParticion - size.SizeSuperBloque())
+
+	// Tamaños de las estructuras
+	sizeInodo := int64(size.SizeTablaInodo())
+	sizeBloque := int64(size.SizeBloqueArchivo())
+	sizeSuperBloque := int64(size.SizeSuperBloque())
+
+	// Asumir proporción: 1 inodo por cada 10 bloques (razonable para pruebas)
+	// Tamaño por "unidad" = 1 inodo + 10 bloques + overhead de bitmaps (~2 bytes)
+	unidadSize := sizeInodo + 10*sizeBloque + 2
+
+	if unidadSize <= 0 {
+		return "Error en el cálculo de tamaños de estructuras", true
+	}
+
+	numeroUnidades := tamanioDisponible / unidadSize
+	if numeroUnidades < 1 {
+		numeroUnidades = 1
+	}
+
+	numeroInodos := int32(numeroUnidades)
+	numeroBloques := numeroInodos * 10
+
+	// Verificar que todo realmente quepa
+	bitmapInodosBytes := (numeroInodos + 7) / 8 // ceil(numeroInodos/8)
+	bitmapBloquesBytes := (numeroBloques + 7) / 8
+	tablaInodosBytes := numeroInodos * int32(sizeInodo)
+	bloquesBytes := numeroBloques * int32(sizeBloque)
+
+	tamanioTotal := sizeSuperBloque +
+		int64(bitmapInodosBytes) +
+		int64(bitmapBloquesBytes) +
+		int64(tablaInodosBytes) +
+		int64(bloquesBytes)
+
+	if tamanioTotal > int64(tamanioParticion) {
+		// Si no cabe, reducir drásticamente
+		numeroInodos = 10
+		numeroBloques = 50
+	}
 
 	color.Cyan("\n→ Formateando partición como EXT2...")
 	color.Yellow("  Calculando estructuras:")
-	color.White("    • Inodos: %d", numeroEstructuras)
+	color.White("    • Inodos: %d", numeroInodos)
 	color.White("    • Bloques: %d", numeroBloques)
 
 	// ==================== PASO 1: LIMPIAR PARTICIÓN ====================
-	color.Cyan("\n→ Limpiando partición...")
-	if err := limpiarParticion(file, inicioParticion, tamanioParticion); err != nil {
+	color.Cyan("→ Limpiando partición...")
+	if err := utils.LimpiarParticion(file, inicioParticion, tamanioParticion); err != nil { // Usa utils.LimpiarParticion
 		return "[MKFS]: Error al limpiar partición", true
 	}
 
 	// ==================== PASO 2: CREAR SUPERBLOQUE ====================
 	color.Cyan("→ Creando SuperBloque...")
-	sb := crearSuperBloque(numeroEstructuras, numeroBloques, inicioParticion)
+	sb := crearSuperBloque(numeroInodos, numeroBloques, inicioParticion, fs)
 
-	// Escribir SuperBloque
 	if _, err := file.Seek(int64(inicioParticion), 0); err != nil {
 		return "[MKFS]: Error al posicionar puntero en SuperBloque", true
 	}
@@ -126,7 +163,7 @@ func formatearEXT2(file *os.File, particion *structures.Partition, id string, no
 
 	// ==================== PASO 3: INICIALIZAR BITMAPS ====================
 	color.Cyan("→ Inicializando Bitmaps...")
-	if err := inicializarBitmaps(file, &sb, numeroEstructuras, numeroBloques); err != nil {
+	if err := inicializarBitmaps(file, &sb, numeroInodos, numeroBloques); err != nil {
 		return "[MKFS]: Error al inicializar bitmaps", true
 	}
 
@@ -158,22 +195,17 @@ func formatearEXT2(file *os.File, particion *structures.Partition, id string, no
 		return "[MKFS]: Error al crear users.txt", true
 	}
 
-	// ==================== PASO 7: ACTUALIZAR MBR ====================
-	color.Cyan("→ Actualizando MBR...")
-	// La partición ya está formateada, no necesitamos cambiar nada en el MBR
-	// El estado de montado ya se maneja en mount/mounted
-
 	// ==================== RESULTADO ====================
 	color.Green("\n═══════════════════════════════════════════════════════════")
-	color.Green("✓ FORMATEO COMPLETADO EXITOSAMENTE")
+	color.Green("FORMATEO COMPLETADO EXITOSAMENTE")
 	color.Green("═══════════════════════════════════════════════════════════")
 	color.Cyan("  ID:                %s", id)
 	color.Cyan("  Partición:         %s", nombrePart)
 	color.Cyan("  Sistema Archivos:  EXT2")
-	color.Cyan("  Tipo Formateo:     FULL")
+	color.Cyan("  Tipo Formateo:     %s", tipoFormateo)
 	color.Green("  ───────────────────────────────────────────────────────")
-	color.Cyan("  Total Inodos:      %d", numeroEstructuras)
-	color.Cyan("  Inodos Libres:     %d", numeroEstructuras-2)
+	color.Cyan("  Total Inodos:      %d", numeroInodos)
+	color.Cyan("  Inodos Libres:     %d", numeroInodos-2)
 	color.Cyan("  Total Bloques:     %d", numeroBloques)
 	color.Cyan("  Bloques Libres:    %d", numeroBloques-2)
 	color.Green("  ───────────────────────────────────────────────────────")
@@ -185,33 +217,7 @@ func formatearEXT2(file *os.File, particion *structures.Partition, id string, no
 	return "", false
 }
 
-// limpiarParticion llena la partición con ceros
-func limpiarParticion(file *os.File, inicio int32, tamanio int32) error {
-	buffer := make([]byte, 1024)
-	restante := tamanio
-
-	if _, err := file.Seek(int64(inicio), 0); err != nil {
-		return err
-	}
-
-	for restante > 0 {
-		escribir := int32(1024)
-		if restante < escribir {
-			escribir = restante
-		}
-
-		if _, err := file.Write(buffer[:escribir]); err != nil {
-			return err
-		}
-
-		restante -= escribir
-	}
-
-	return nil
-}
-
-// crearSuperBloque crea e inicializa el SuperBloque
-func crearSuperBloque(numeroInodos int32, numeroBloques int32, inicioParticion int32) structures.SuperBloque {
+func crearSuperBloque(numeroInodos int32, numeroBloques int32, inicioParticion int32, fs string) structures.SuperBloque {
 	var sb structures.SuperBloque
 
 	sb.S_filesistem_type = 2 // EXT2

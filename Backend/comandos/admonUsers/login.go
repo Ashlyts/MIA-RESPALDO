@@ -1,8 +1,10 @@
+// admonUsers/login.go
 package admonUsers
 
 import (
 	"Proyecto/Estructuras/structures"
 	"Proyecto/comandos/admonDisk"
+	"Proyecto/comandos/global"
 	"Proyecto/comandos/utils"
 	"fmt"
 	"os"
@@ -14,7 +16,7 @@ import (
 // LoginExecute maneja el comando login
 func LoginExecute(comando string, parametros map[string]string) (string, bool) {
 	// Verificar que no haya sesión activa
-	if SesionActiva != nil {
+	if global.SesionActiva != nil {
 		return "[LOGIN]: Ya hay una sesión activa. Use LOGOUT primero", true
 	}
 
@@ -38,7 +40,6 @@ func LoginExecute(comando string, parametros map[string]string) (string, bool) {
 }
 
 func iniciarSesion(usuario string, password string, idParticion string) (string, bool) {
-	// Buscar la partición montada
 	particionMontada, err := admonDisk.GetMountedPartitionByID(idParticion)
 	if err != nil {
 		return fmt.Sprintf("[LOGIN]: Partición con ID '%s' no encontrada o no montada", idParticion), true
@@ -51,7 +52,6 @@ func iniciarSesion(usuario string, password string, idParticion string) (string,
 	}
 	defer file.Close()
 
-	// Leer el MBR para obtener la partición
 	mbr, er, strError := utils.ObtenerEstructuraMBR(particionMontada.DiskPath)
 	if er {
 		return strError, er
@@ -72,13 +72,13 @@ func iniciarSesion(usuario string, password string, idParticion string) (string,
 	}
 
 	// Leer el SuperBloque
-	sb, errSB := leerSuperBloque(file, particion.Part_start)
+	sb, errSB := utils.LeerSuperBloque(file, particion.Part_start) // Usa utils.LeerSuperBloque
 	if errSB != nil {
 		return "[LOGIN]: Partición no formateada o error al leer SuperBloque", true
 	}
 
 	// Leer el archivo users.txt
-	contenidoUsers, errUsers := leerArchivoDesdeRuta(file, &sb, "/users.txt")
+	contenidoUsers, errUsers := utils.LeerArchivoDesdeRuta(file, &sb, "/users.txt") // Usa utils.LeerArchivoDesdeRuta
 	if errUsers != nil {
 		return "[LOGIN]: Error al leer archivo users.txt: " + errUsers.Error(), true
 	}
@@ -89,8 +89,8 @@ func iniciarSesion(usuario string, password string, idParticion string) (string,
 		return "[LOGIN]: Usuario o contraseña incorrectos", true
 	}
 
-	// Crear la sesión
-	SesionActiva = &SesionUsuario{
+	// Crear la sesión - Usa global.SesionActiva y global.SesionUsuario
+	global.SesionActiva = &global.SesionUsuario{
 		UsuarioActual: usuario,
 		UID:           uid,
 		GID:           gid,
@@ -101,7 +101,7 @@ func iniciarSesion(usuario string, password string, idParticion string) (string,
 
 	// Mostrar mensaje de éxito
 	color.Green("═══════════════════════════════════════════════════════════")
-	color.Green("✓ SESIÓN INICIADA EXITOSAMENTE")
+	color.Green("SESIÓN INICIADA EXITOSAMENTE")
 	color.Green("═══════════════════════════════════════════════════════════")
 	color.Cyan("  Usuario:        %s", usuario)
 	color.Cyan("  UID:            %d", uid)
@@ -114,7 +114,6 @@ func iniciarSesion(usuario string, password string, idParticion string) (string,
 	return "", false
 }
 
-// ValidarCredenciales verifica usuario y contraseña en el contenido de users.txt
 func ValidarCredenciales(contenido string, usuario string, password string) (int32, int32, bool) {
 	lineas := strings.Split(contenido, "\n")
 
@@ -125,13 +124,18 @@ func ValidarCredenciales(contenido string, usuario string, password string) (int
 		}
 
 		// Formato: UID,U,grupo,usuario,password
+		// Formato: GID,G,nombre_grupo
 		partes := strings.Split(linea, ",")
-		if len(partes) < 5 {
+		if len(partes) < 3 {
 			continue
 		}
 
 		tipo := strings.TrimSpace(partes[1])
 		if tipo != "U" {
+			continue
+		}
+
+		if len(partes) < 5 {
 			continue
 		}
 

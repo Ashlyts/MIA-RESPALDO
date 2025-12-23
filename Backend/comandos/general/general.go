@@ -13,22 +13,23 @@ var NamePath = "VDIC-MIA"
 var ReportPath = "VDIC-MIA/Rep"
 var DiskPath = "VDIC-MIA/Disks"
 
-func ObtenerParametros(x string) []string {
-	var comandos []string
-	atributos := regexp.MustCompile(`(-|>)(\w+)(?:="([^"]+)"|=(-?/?(\w+)?(?:/?[\w.-]+)*))?`).FindAllStringSubmatch(x, -1)
-	for _, matches := range atributos {
-		atributo := matches[2]
-		valorConComillas := matches[3]
-		valorSinComillas := matches[4]
-		if valorConComillas != "" {
-			comandos = append(comandos, fmt.Sprintf("%s=%s", atributo, valorConComillas))
-		} else if valorSinComillas != "" {
-			comandos = append(comandos, fmt.Sprintf("%s=%s", atributo, valorSinComillas))
-		} else {
-			comandos = append(comandos, atributo)
+func ObtenerParametros(comando string) map[string]string {
+	parametros := make(map[string]string)
+	re := regexp.MustCompile(`-([a-zA-Z]\w*)=("[^"]*"|\S+)`)
+	matches := re.FindAllStringSubmatch(comando, -1)
+
+	for _, match := range matches {
+		nombre := strings.ToLower(match[1])
+		valor := match[2]
+
+		if len(valor) >= 2 && valor[0] == '"' && valor[len(valor)-1] == '"' {
+			valor = valor[1 : len(valor)-1]
 		}
+
+		parametros[nombre] = valor
 	}
-	return comandos
+
+	return parametros
 }
 
 func CrearCarpeta() {

@@ -1,6 +1,9 @@
-package admonUsers
+// filecomands/mkgrp.go
+package filecomands
 
 import (
+	"Proyecto/comandos/global"
+	"Proyecto/comandos/utils"
 	"fmt"
 	"os"
 	"strconv"
@@ -12,12 +15,12 @@ import (
 // MkgrpExecute maneja el comando mkgrp
 func MkgrpExecute(comando string, parametros map[string]string) (string, bool) {
 	// Verificar sesión activa
-	if SesionActiva == nil {
+	if global.SesionActiva == nil {
 		return "[MKGRP]: No hay sesión activa. Use LOGIN primero", true
 	}
 
 	// Solo root puede crear grupos
-	if SesionActiva.UsuarioActual != "root" {
+	if global.SesionActiva.UsuarioActual != "root" {
 		return "[MKGRP]: Solo el usuario root puede crear grupos", true
 	}
 
@@ -36,20 +39,20 @@ func MkgrpExecute(comando string, parametros map[string]string) (string, bool) {
 
 func crearGrupo(nombreGrupo string) (string, bool) {
 	// Abrir el disco
-	file, err := os.OpenFile(SesionActiva.PathDisco, os.O_RDWR, 0666)
+	file, err := os.OpenFile(global.SesionActiva.PathDisco, os.O_RDWR, 0666)
 	if err != nil {
 		return "[MKGRP]: Error al abrir el disco", true
 	}
 	defer file.Close()
 
 	// Leer SuperBloque
-	sb, errSB := leerSuperBloque(file, SesionActiva.Particion.Part_start)
+	sb, errSB := utils.LeerSuperBloque(file, global.SesionActiva.Particion.Part_start)
 	if errSB != nil {
 		return "[MKGRP]: Error al leer SuperBloque", true
 	}
 
 	// Leer contenido actual de users.txt
-	contenidoActual, errRead := leerArchivoDesdeRuta(file, &sb, "/users.txt")
+	contenidoActual, errRead := utils.LeerArchivoDesdeRuta(file, &sb, "/users.txt")
 	if errRead != nil {
 		return "[MKGRP]: Error al leer users.txt", true
 	}
@@ -66,8 +69,8 @@ func crearGrupo(nombreGrupo string) (string, bool) {
 	nuevaLinea := fmt.Sprintf("%d,G,%s\n", nuevoGID, nombreGrupo)
 	nuevoContenido := contenidoActual + nuevaLinea
 
-	// Escribir el nuevo contenido
-	if err := EscribirArchivoUsersText(file, &sb, nuevoContenido); err != nil {
+	// Escribir el nuevo contenido usando la función de utils
+	if err := utils.EscribirArchivoUsersText(file, &sb, nuevoContenido); err != nil {
 		return "[MKGRP]: Error al escribir en users.txt: " + err.Error(), true
 	}
 

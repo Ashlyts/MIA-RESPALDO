@@ -1,6 +1,9 @@
-package admonUsers
+// filecomands/mkusr.go
+package filecomands
 
 import (
+	"Proyecto/comandos/global"
+	"Proyecto/comandos/utils"
 	"fmt"
 	"os"
 	"strconv"
@@ -12,12 +15,12 @@ import (
 // MkusrExecute maneja el comando mkusr
 func MkusrExecute(comando string, parametros map[string]string) (string, bool) {
 	// Verificar sesión activa
-	if SesionActiva == nil {
+	if global.SesionActiva == nil {
 		return "[MKUSR]: No hay sesión activa. Use LOGIN primero", true
 	}
 
 	// Solo root puede crear usuarios
-	if SesionActiva.UsuarioActual != "root" {
+	if global.SesionActiva.UsuarioActual != "root" {
 		return "[MKUSR]: Solo el usuario root puede crear usuarios", true
 	}
 
@@ -55,20 +58,20 @@ func MkusrExecute(comando string, parametros map[string]string) (string, bool) {
 
 func crearUsuario(nombreUsuario string, password string, grupo string) (string, bool) {
 	// Abrir el disco
-	file, err := os.OpenFile(SesionActiva.PathDisco, os.O_RDWR, 0666)
+	file, err := os.OpenFile(global.SesionActiva.PathDisco, os.O_RDWR, 0666)
 	if err != nil {
 		return "[MKUSR]: Error al abrir el disco", true
 	}
 	defer file.Close()
 
 	// Leer SuperBloque
-	sb, errSB := leerSuperBloque(file, SesionActiva.Particion.Part_start)
+	sb, errSB := utils.LeerSuperBloque(file, global.SesionActiva.Particion.Part_start)
 	if errSB != nil {
 		return "[MKUSR]: Error al leer SuperBloque", true
 	}
 
 	// Leer contenido actual de users.txt
-	contenidoActual, errRead := leerArchivoDesdeRuta(file, &sb, "/users.txt")
+	contenidoActual, errRead := utils.LeerArchivoDesdeRuta(file, &sb, "/users.txt")
 	if errRead != nil {
 		return "[MKUSR]: Error al leer users.txt", true
 	}
@@ -79,7 +82,7 @@ func crearUsuario(nombreUsuario string, password string, grupo string) (string, 
 	}
 
 	// Verificar que el grupo exista
-	if !ExisteGrupo(contenidoActual, grupo) {
+	if !ExisteGrupo(contenidoActual, grupo) { // Asume que ExisteGrupo está disponible en utils o filecomands
 		return fmt.Sprintf("[MKUSR]: El grupo '%s' no existe", grupo), true
 	}
 
@@ -90,8 +93,8 @@ func crearUsuario(nombreUsuario string, password string, grupo string) (string, 
 	nuevaLinea := fmt.Sprintf("%d,U,%s,%s,%s\n", nuevoUID, grupo, nombreUsuario, password)
 	nuevoContenido := contenidoActual + nuevaLinea
 
-	// Escribir el nuevo contenido
-	if err := EscribirArchivoUsersText(file, &sb, nuevoContenido); err != nil {
+	// Escribir el nuevo contenido usando la función de utils
+	if err := utils.EscribirArchivoUsersText(file, &sb, nuevoContenido); err != nil {
 		return "[MKUSR]: Error al escribir en users.txt: " + err.Error(), true
 	}
 
